@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  <title>RongYou (融优学堂)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="control-panel">
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="school-select">School</label>
+        <select id="school-select"></select>
+      </div>
+      <div class="control-group">
+        <label for="username-input">Username</label>
+        <input type="text" id="username-input" placeholder="Student ID">
+      </div>
+      <div class="control-group">
+        <label for="password-input">Password</label>
+        <input type="password" id="password-input" placeholder="Password">
+      </div>
+      <div class="control-group buttons">
+        <button id="login-btn">Login</button>
+        <button id="autoplay-btn">Auto Play</button>
+        <button id="stop-btn" disabled>Stop</button>
+      </div>
+      <div class="control-group status-group">
+        <span id="status-indicator" class="status idle">Idle</span>
+        <button id="toggle-log-btn" class="small-btn">Log</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="log-panel" class="hidden">
+    <div id="log-content"></div>
+  </div>
+
+  <div id="webview-container">
+    <webview id="site-webview" src="https://www.livedu.com.cn" allowpopups></webview>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
