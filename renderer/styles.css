@@ -111,6 +111,15 @@ button.small-btn:hover {
   background: #585b70;
 }
 
+button.small-btn.active {
+  background: #f38ba8;
+  color: #1e1e2e;
+}
+
+button.small-btn.active:hover {
+  background: #eba0ac;
+}
+
 #stop-btn {
   background: #f38ba8;
 }

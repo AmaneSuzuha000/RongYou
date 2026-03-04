@@ -8,8 +8,10 @@ const autoplayBtn = document.getElementById('autoplay-btn');
 const stopBtn = document.getElementById('stop-btn');
 const statusIndicator = document.getElementById('status-indicator');
 const toggleLogBtn = document.getElementById('toggle-log-btn');
+const muteBtn = document.getElementById('mute-btn');
 const logPanel = document.getElementById('log-panel');
 const logContent = document.getElementById('log-content');
+const webview = document.getElementById('site-webview');
 
 // Load settings and populate UI
 async function init() {
@@ -35,6 +37,20 @@ init();
 // Log toggle
 toggleLogBtn.addEventListener('click', () => {
   logPanel.classList.toggle('hidden');
+});
+
+// Mute toggle — default to muted
+let isMuted = true;
+webview.addEventListener('dom-ready', () => {
+  webview.setAudioMuted(true);
+});
+muteBtn.textContent = 'Unmute';
+muteBtn.classList.add('active');
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  webview.setAudioMuted(isMuted);
+  muteBtn.textContent = isMuted ? 'Unmute' : 'Mute';
+  muteBtn.classList.toggle('active', isMuted);
 });
 
 function appendLog(message) {
