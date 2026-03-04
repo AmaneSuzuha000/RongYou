@@ -6,6 +6,9 @@ const Store = require('./src/store');
 const { SCHOOLS, DEFAULT_SCHOOL_CODE } = require('./src/schools');
 const automation = require('./src/automation');
 
+// Disable Chromium's auto dark mode that forcibly darkens web content
+app.commandLine.appendSwitch('disable-features', 'WebContentsForceDark');
+
 let mainWindow = null;
 let store = null;
 let webviewContents = null;

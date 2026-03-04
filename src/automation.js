@@ -12,7 +12,7 @@ function sleep(ms) {
 }
 
 // Wait for an element to appear inside the webview
-async function waitForElement(webview, selector, timeoutMs = 10000) {
+async function waitForElement(webview, selector, timeoutMs = 20000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const found = await webview.executeJavaScript(`!!document.querySelector('${selector}')`);
@@ -23,7 +23,7 @@ async function waitForElement(webview, selector, timeoutMs = 10000) {
 }
 
 // Wait for element inside iframe named "zwshow"
-async function waitForIframeElement(webview, selector, timeoutMs = 10000) {
+async function waitForIframeElement(webview, selector, timeoutMs = 20000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const found = await webview.executeJavaScript(`
@@ -283,7 +283,7 @@ async function closeLoginPopup(webview, log) {
       if (btn) btn.click();
     `);
     log('Closed login popup');
-    await sleep(1000);
+    await sleep(5000);
   } catch (e) {
     log('No login popup found (or already closed)');
   }
@@ -303,7 +303,7 @@ async function findCourse(webview, log) {
       })()
     `);
     log('Clicked continue learning link');
-    await sleep(2000);
+    await sleep(5000);
   } catch (e) {
     log(`Find course error: ${e.message}`);
   }
@@ -365,10 +365,21 @@ async function playVideo(webview, course, log) {
   try {
     log(`Learning: ${course.text}`);
 
-    // Click the course link
+    // Capture current iframe src before clicking so we can detect reload
+    const oldIframeSrc = await webview.executeJavaScript(`
+      (function() {
+        var iframe = document.querySelector('iframe[name="zwshow"]');
+        return iframe ? iframe.src : '';
+      })()
+    `);
+
+    // Click the course link (scoped to left_nav to match getContent indices)
     await webview.executeJavaScript(`
       (function() {
-        var dds = document.querySelectorAll('dd');
+        var leftSide = document.querySelector('div.left_nav') ||
+          document.evaluate('/html/body/div[12]/div[2]/div/div[1]/div[1]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (!leftSide) return;
+        var dds = leftSide.querySelectorAll('dd');
         var dd = dds[${course.index}];
         if (dd) {
           var link = dd.querySelector('a');
@@ -376,10 +387,25 @@ async function playVideo(webview, course, log) {
         }
       })()
     `);
-    await sleep(2000);
+
+    // Wait for iframe to actually reload (src changes or content becomes unavailable)
+    log('Waiting for course content to load...');
+    const reloadStart = Date.now();
+    while (Date.now() - reloadStart < 20000) {
+      const currentSrc = await webview.executeJavaScript(`
+        (function() {
+          var iframe = document.querySelector('iframe[name="zwshow"]');
+          return iframe ? iframe.src : '';
+        })()
+      `);
+      if (currentSrc && currentSrc !== oldIframeSrc) break;
+      await sleep(500);
+    }
+    // Extra wait for the new iframe content to fully render
+    await sleep(5000);
 
     // Count videos inside the iframe
-    await waitForIframeElement(webview, '[id^="sp_index_"]', 10000);
+    await waitForIframeElement(webview, '[id^="sp_index_"]', 20000);
 
     const videoCount = await webview.executeJavaScript(`
       (function() {
@@ -448,7 +474,7 @@ async function playVideo(webview, course, log) {
           }
         })()
       `);
-      await sleep(3000);
+      await sleep(5000);
 
       // Wait for video element and get duration
       await waitForIframeElement(webview, '#myVideo_' + vi, 10000);
@@ -540,7 +566,7 @@ async function startAutoPlay(webview, log) {
 
     // Navigate to course
     await findCourse(webview, log);
-    await sleep(2000);
+    await sleep(5000);
 
     while (!autoPlayAbort) {
       const courseList = await getContent(webview);
@@ -566,7 +592,7 @@ async function startAutoPlay(webview, log) {
 
       // Refresh and wait for page to reload
       await webview.executeJavaScript('window.location.reload()');
-      await sleep(3000);
+      await sleep(5000);
     }
 
     log(autoPlayAbort ? 'Auto play stopped' : 'Auto play finished');
