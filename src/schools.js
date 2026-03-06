@@ -74,6 +74,6 @@ const SCHOOLS = {
   '4111012453': '中国劳动关系学院',
 };
 
-const DEFAULT_SCHOOL_CODE = '4111010007';
+const DEFAULT_SCHOOL_CODE = '4151010613';
 
 module.exports = { SCHOOLS, DEFAULT_SCHOOL_CODE };
